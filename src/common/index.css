@@ -185,7 +185,7 @@ div.card {
   background: #ffffff;
   display: inline-block;
   margin: 8px;
-  max-width: 370px;
+  max-width: 340px;
   perspective: 1000;
   position: relative;
   text-align: center;
@@ -199,7 +199,7 @@ div.card {
 }
 div.card img {
   padding-top: 13px;
-  max-width: 370px;
+  max-width: 340px;
   max-height: 250px;
 }
 div.card .card__image-holder {
@@ -558,4 +558,32 @@ div.card.show div.flap2 {
 
 #tong2 {
 	display: none;
+}
+
+ul.tabs{
+  margin: 0px;
+  padding: 0px;
+  list-style: none;
+}
+ul.tabs li{
+  background: none;
+  color: #222;
+  display: inline-block;
+  padding: 10px 10px;
+  cursor: pointer;
+}
+
+ul.tabs li.current{
+  background: #ededed;
+  color: #222;
+}
+
+.tab-content{
+  display: none;
+  background: #ededed;
+  padding: 15px;
+}
+
+.tab-content.current{
+  display: inherit;
 }

@@ -15,7 +15,6 @@ function First() {
   const ss_account = window.localStorage.getItem('ss_account');
   const db = getDatabase();
   const giftRef = ref(db, 'gift_list');
-  const shareRef = ref(db, 'share_list');
 
   const [paramType, setParamType] = useState(useParams().type);		// 그룹사용건수
 //var groupParamName = useParams().name;
@@ -29,21 +28,8 @@ function First() {
   const [useCnt, setUseCnt] = useState(0);					// 사용건수
   const [groupCnt, setGroupCnt] = useState(0);				// 공유건수
   const [groupUseCnt, setGroupUseCnt] = useState(0);		// 그룹사용건수
-  const [chk_data, setChk_data] = useState([]);
-
- 
 
   useEffect(() => {
-
-	  
-	onValue(shareRef, (snapshot) => {
-      const users = snapshot.val();
-      for(let id in users) {
-		  if(users[id].account == ss_account){
-			chk_data.push(users[id].groupKey);
-		  }
-      }
-    })
 
     onValue(giftRef, (snapshot) => {
       const users = snapshot.val();
@@ -78,20 +64,6 @@ function First() {
 				}
 			}
 		}
-
-		const set = new Set(chk_data);
-		const uniqueArr = [...set];
-		// 공유된 기프트콘 있는지 확인
-		if(uniqueArr.indexOf(users[id].groupKey  ) >= 0){
-			usersData.push({ ...users[id], id });
-			if(users[id].ss_account != ss_account){
-				if(users[id].useYn == 'Y'){
-					cnt4 = cnt4+1;
-				}else{
-					cnt3 = cnt3+1;
-				}
-			}
-		}		
       }
 
 	  setMyCnt(cnt1);
@@ -100,7 +72,8 @@ function First() {
 	  setGroupUseCnt(cnt4);
 
 
-	  // orderBy 정렬순서	  
+	  // orderBy 정렬순서
+	  
 	  usersData.sort(function(a, b) {
 		  if(a.expired == ""){
 			  a.expired = 0;
@@ -119,7 +92,7 @@ function First() {
 
 //	  if(cnt == 0){
 	if(paramType != 2){
-	  if(cnt1+cnt3 == 0){
+	  if(cnt1 == 0){
 		document.getElementById("tong2").style.display = "block";
 		document.getElementById("tong").style.display = "none";
 	  }else{
@@ -139,9 +112,6 @@ function First() {
 
 
     })
-
-	
-
   }, []);
 
 
@@ -268,8 +238,8 @@ function First() {
 				<span className="right"></span>
 			  </a>
 			  <h2>
-				{data.groupName != '' ? <>[{data.groupName}]</> : null}  {data.brand} 
-				  <small>{data.useYn == 'Y' ? "(사용완료)" : (<>{data.expired != '' ? data.expired.substring(0,4)+'-'+data.expired.substring(4,6)+'-'+data.expired.substring(6,8) : "기한 없음"}</>)}</small>
+				  {data.brand} 
+				  <small>{data.useYn == 'Y' ? "(사용완료)" : (<>{data.expired != '' ? data.expired : "기한 없음"}</>)}</small>
 				  
 			  </h2>
 			</div>

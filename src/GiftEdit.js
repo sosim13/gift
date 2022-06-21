@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import Carousel from 'react-bootstrap/Carousel'
 import axios,{ post } from 'axios';
 import { Button,InputGroup ,FormControl  } from 'react-bootstrap';
-import {useNavigate} from "react-router-dom"
+import { useParams, useNavigate } from 'react-router-dom';
 //import 'bootstrap/dist/css/bootstrap.css
 import { AiOutlinePlusSquare } from "react-icons/ai";
 import moment from 'moment';
 import 'moment/locale/ko';	//대한민국
 import giftcon from "./giftcon";
-import { getDatabase, ref, onValue, push } from "firebase/database";
+import { getDatabase, ref, update, onValue, push } from "firebase/database";
 import {ToastsContainer, ToastsStore, ToastsContainerPosition} from 'react-toasts';
 
 var Barcode = require('react-barcode');
@@ -17,7 +17,7 @@ var rBrand = "";
 var rProduct = "";
 var rPrice = "";
 
-function Second() {
+function GiftEdit() {
   // 로그인체크
   const ss_account = window.localStorage.getItem('ss_account');
   if(ss_account == null){
@@ -25,6 +25,8 @@ function Second() {
   }
   // 현재 날짜
   const wtime = moment().format('YYYYMMDDHHmmss');
+
+  var mainId = useParams().id;
 
   const db = getDatabase();
   const giftRef = ref(db, 'gift_list');
@@ -62,11 +64,16 @@ function Second() {
 	  const users = snapshot.val();
 	  for(let id in users) {
 		const users = snapshot.val();
-		for(let id in users) {
-		  if(users[id].ss_account == ss_account){
-//			console.log(users[id].ss_account+" : "+users[id].barcode);
-
-			chk_data.push(users[id].barcode);
+		for(let id in users) {			 
+		  if(id == mainId){
+			  setUrl(users[id].url);
+			  setBarcode(users[id].barcode);
+			  setBrand(users[id].brand);
+			  setProduct(users[id].product);
+			  setPrice(users[id].price);
+			  setExpired(users[id].expired);
+			  setGroupKey(users[id].groupKey);
+			  setGroupName(users[id].groupName);
 		  }
 		}
 	  }
@@ -271,20 +278,10 @@ function Second() {
 	  factory();
   }, []);
 
-  const onClickAdd = () => {
+  const onEditAdd = () => {
 
 	const set = new Set(chk_data);
 	const uniqueArr = [...set];
-
-    if(uniqueArr.indexOf(barcode) >= 0){
-		alert("이미 등록된 기프트콘입니다.");
-        return false;
-	}
-
-	if(barcode == ''){
-		alert('이미지가 없거나 인식되지 않는 이미지 입니다.');
-		return false;
-	}
 
 	if(brand == ''){		
 		alert('브랜드명을 입력해주세요.');
@@ -296,57 +293,45 @@ function Second() {
 //		return false;
 //	}
 
-	push(ref(db, 'gift_list'), {
-	  ss_account: ss_account,
-	  url: url,
-	  barcode: barcode,
-	  brand: brand,
-	  product: product,
-	  price: price,
-	  expired: expired,
-	  wtime: wtime,
-	  groupKey: groupKey,
-	  groupName: groupName
-	})
-	.then(() => {
-	  // Data saved successfully!
-      ToastsStore.success("등록했습니다.");
-	  window.location.replace("/second");
-	})
-	.catch((error) => {
-	  // The write failed...
-	  console.log("오류 : "+error);
-	  ToastsStore.success("오류가 발생하였습니다. ("+error+")");
-	});	
-
+	update(ref(db, 'gift_list/'+mainId), {
+		  brand: brand,
+		  product: product,
+		  price: price,
+		  expired: expired,
+		  wtime: wtime,
+		  groupKey: groupKey,
+		  groupName: groupName
+	    })
+        .then(() => {
+		  // Data saved successfully!
+		  console.log("성공");
+		  ToastsStore.success("등록했습니다.");
+		  window.location.replace("/");
+		})
+		.catch((error) => {
+		  // The write failed...
+		  console.log("오류 : "+error);
+		});
   }
 
   return (
     <div className="App">
 	  <div className="product-title">
 		  <div className="product-img-div">
+		  {url != '' ? 
 			<label htmlFor="file">
-			  <div  style={{width:'80%', marginTop:'10px',marginLeft:'10%',border:'0px solid black'}}>
-			  { imgFile == null && <AiOutlinePlusSquare size="150" /> }<br/>
-
-			  {imgBase64.map((item) => { 
-			   return(
+			  <div style={{width:'80%', marginTop:'10px',marginLeft:'10%',border:'0px solid black'}}>
 					<img
 					  className="product-img"
-					  src={item}
+					  src={url}
 					  alt="IMAGE"
 					  style={{width:"80%"}}
 					/>
-					)
-					}) }
 			  </div>
 			  </label>
-			  <input type="file" id="file" style={{display:'none'}} onChange={handleChangeFile} multiple="multiple"  />	
+			: null
+			}						
 			</div>
-		</div>
-		<div>
-			{barcode != '' ? <Barcode value={barcode} height={40} /> : null}
-			<br/><input type="text" name={'barcode'} className="gift_input" value={barcode} onChange={onChange} placeholder="바코드"/>
 		</div>
 		<div>
 			<input type="text" name={'brand'} className="gift_input" value={brand} onChange={onChange} placeholder="브랜드"/>
@@ -362,14 +347,14 @@ function Second() {
 		</div>
 		<select name="groupKey" id="groupSelect" className="gift_input_select" onChange={onSelectChange}>
 			<option value="">공유안함</option>
-		{datas?.map(data => <option value={data.groupKey} key={data.id}>
+		{datas?.map(data => <option value={data.id} key={data.id} selected={groupKey == data.id ? 'selected' : ''}>
 			{data.name}
 		</option>
 		)}
 		</select>
 		<div>
 			{barcode != '' ? (
-			<button onClick={onClickAdd} style={{border:'2px solid black',width:'200px',fontSize:'20px', marginTop:'10px'}}>UPLOAD</button>
+			<button onClick={onEditAdd} style={{border:'2px solid black',width:'200px',fontSize:'20px', marginTop:'10px'}}>UPLOAD</button>
 			) : (
 				null
 			)}
@@ -380,5 +365,5 @@ function Second() {
   );
 }
 
-export default Second;
+export default GiftEdit;
 

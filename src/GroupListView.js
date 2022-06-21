@@ -3,7 +3,7 @@ import Carousel from 'react-bootstrap/Carousel'
 import axios,{ post } from 'axios';
 import { Button,InputGroup ,FormControl  } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AiOutlineArrowLeft, AiOutlineUserSwitch, AiOutlineFrown, AiOutlineTeam, AiOutlineCloseCircle, AiFillLock, AiFillNotification } from "react-icons/ai";
+import { AiOutlineArrowLeft, AiOutlineUserSwitch, AiOutlineFrown, AiOutlineTeam, AiOutlineCloseCircle, AiFillLock, AiFillNotification, AiOutlineDelete } from "react-icons/ai";
 import moment from 'moment';
 import 'moment/locale/ko';	//대한민국
 import giftcon from "./giftcon";
@@ -25,6 +25,7 @@ const GroupListView = () => {
   const wtime = moment().format('YYYYMMDDHHmmss');
   const useTime = moment().format('YYYYMMDDHHmmss');
 
+  const [paramType, setParamType] = useState(useParams().type);		// 그룹사용건수
   var groupParamName = useParams().name;
   var groupParamKey = useParams().key;
   
@@ -48,7 +49,15 @@ const GroupListView = () => {
       var cnt = 0;
       for(let id in users) {
 		  if(users[id].groupKey == groupParamKey){
-	        usersData.push({ ...users[id], id });	
+	        if(paramType == 2){		// 사용
+					if(users[id].useYn == 'Y'){
+						usersData.push({ ...users[id], id });
+					}
+				}else{							// 미사용
+					if(users[id].useYn != 'Y'){
+						usersData.push({ ...users[id], id });
+					}
+				}
 			cnt = cnt +1;		
 		  }		
       }
@@ -65,7 +74,6 @@ const GroupListView = () => {
 		  var border = parseInt(b.expired.toString().replace(/[ \{\}\[\]\/?.,;:|\)*~`!^\-_+┼<>@\#$%&\ '\"\\(\=]/gi, ""));
 	    return aorder - border;
 	  });
-	  console.log("cnt:"+cnt);
 	  if(cnt == 0){
 		document.getElementById("tong2").style.display = "block";
 		document.getElementById("tong").style.display = "none";
@@ -84,7 +92,15 @@ const GroupListView = () => {
       for(let id in users) {
 		  if(users[id].account != ss_account){
 		    if(users[id].groupKey == groupParamKey){
-	          usersData.push({ ...users[id], id });		
+				if(paramType == 2){		// 사용
+					if(users[id].useYn == 'Y'){
+						usersData.push({ ...users[id], id });
+					}
+				}else{							// 미사용
+					if(users[id].useYn != 'Y'){
+						usersData.push({ ...users[id], id });
+					}
+				}		
 			  chk_data.push(users[id].account);
 		    }		
 
@@ -244,6 +260,20 @@ const GroupListView = () => {
 	}
   }
 
+  
+
+  const goEdit = (id) => {
+
+	window.location.replace("/GiftEdit/"+id);
+
+  };
+
+  
+
+  const onLink = (name, key) => {
+	  window.location.replace('/GroupListView/'+name+'/'+key+'/2');
+  }
+
    return (
 	<div>
 		<div>		
@@ -319,13 +349,23 @@ const GroupListView = () => {
 				</div>
 				{data.useYn != 'Y' ?
 				<div className="card-actions">
-				  <a href={'#'+data.id} className="btn" onClick={() => onUpdate(data.id, 'Y')}>수정</a>&nbsp;
-				  <a href={'#'+data.id} className="btn" onClick={() => onClickRemove(data.id)}>삭제</a>&nbsp;
+					{data.ss_account == ss_account ?
+						<>
+							<a href={'#'+data.id} className="btn" onClick={() => goEdit(data.id)}>수정</a>&nbsp;
+							<a href={'#'+data.id} className="btn" onClick={() => onClickRemove(data.id)}>삭제</a>&nbsp;
+						</>
+					: null
+					}
 				  <a href={'#'+data.id} className="btn" onClick={() => onUpdate(data.id, 'Y')}>사용</a>&nbsp;
 				</div>
 			    :
-				<div className="card-actions">					
-				  <a href={'#'+data.id} className="btn" onClick={() => onClickRemove(data.id)}>삭제</a>&nbsp;
+				<div className="card-actions">		
+				{data.ss_account == ss_account ?
+					<>
+						<a href={'#'+data.id} className="btn" onClick={() => onClickRemove(data.id)}>삭제</a>&nbsp;
+					</>
+					: null
+					}
 				  <a href={'#'+data.id} className="btn" onClick={() => onUpdate(data.id, 'N')}>사용취소</a>
 				</div>				 
 				}
@@ -333,6 +373,11 @@ const GroupListView = () => {
 			</div>
 		  </div>
 	)}		  
+	{paramType !=2 ? 
+	  <div className="share_list" onClick={() => onLink(groupParamName, groupParamKey)}>
+	      <AiOutlineDelete size="30" /><br/>사용완료조회
+	  </div>
+		: null }
 		</div>
 		    <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 		<ToastsContainer className='toast' store={ToastsStore} lightBackground/>
