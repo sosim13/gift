@@ -142,6 +142,9 @@ const Login = () => {
           <FcGoogle size="20" className='icon' />
           구글 계정으로 로그인
         </button>*/}
+		<br/>
+		<div><font color="red"><b>테스트아이디 : test@m.mm</b></font></div>
+		<div><font color="red"><b>테스트비밀번호 : 321321</b></font></div>
       </div>
 		<ToastsContainer className='toast' store={ToastsStore} lightBackground/>
     </div>

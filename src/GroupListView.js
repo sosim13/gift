@@ -14,6 +14,7 @@ import Modal from './Modal';
 var Barcode = require('react-barcode');
 var displayId = "";
 var chk_data = [];
+var tot_cnt = 0;
 
 const GroupListView = () => {
   // 로그인체크
@@ -50,15 +51,17 @@ const GroupListView = () => {
       for(let id in users) {
 		  if(users[id].groupKey == groupParamKey){
 	        if(paramType == 2){		// 사용
-					if(users[id].useYn == 'Y'){
-						usersData.push({ ...users[id], id });
-					}
-				}else{							// 미사용
-					if(users[id].useYn != 'Y'){
-						usersData.push({ ...users[id], id });
-					}
+				if(users[id].useYn == 'Y'){
+					usersData.push({ ...users[id], id });
+					cnt = cnt +1;
 				}
-			cnt = cnt +1;		
+			}else{							// 미사용
+				if(users[id].useYn != 'Y'){
+					usersData.push({ ...users[id], id });
+					cnt = cnt +1;
+				}
+			}	
+			tot_cnt = tot_cnt +1;
 		  }		
       }
 	  // orderBy 정렬순서
@@ -74,6 +77,7 @@ const GroupListView = () => {
 		  var border = parseInt(b.expired.toString().replace(/[ \{\}\[\]\/?.,;:|\)*~`!^\-_+┼<>@\#$%&\ '\"\\(\=]/gi, ""));
 	    return aorder - border;
 	  });
+	  console.log("cnt : "+cnt);
 	  if(cnt == 0){
 		document.getElementById("tong2").style.display = "block";
 		document.getElementById("tong").style.display = "none";
@@ -191,7 +195,7 @@ const GroupListView = () => {
   }
 
   const onUpdate = (id, statusVal) => {
-    const [user] = datas.filter(el => el.id === id);
+//    const [user] = datas.filter(el => el.id === id);
 
 
     if(statusVal == 'Y'){
@@ -223,7 +227,7 @@ const GroupListView = () => {
 		});
 	}
 
-    setDatas(datas.map(el => el.id === id ? {...el, useYn: statusVal} : el));
+//    setDatas(datas.map(el => el.id === id ? {...el, useYn: statusVal} : el));
   };
 
   const onClickRemove = (id) => {
@@ -298,7 +302,7 @@ const GroupListView = () => {
 			  )}
 			</main>
             <footer>
-				<input type="text" name="account" value={account} className="gift_input" onChange={onChange} placeholder="공유할 아이디" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="text" name="account" value={account} className="gift_input" onChange={onChange} placeholder="공유할 아이디" className='shareInput' />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               <button className="close" onClick={onClickAdd}>
                 등록
               </button>
@@ -310,9 +314,11 @@ const GroupListView = () => {
 		  &nbsp;
 	  </div>
 	  <div id="tong2" className="tong">
-		  <h3>등록된 기프트콘이 없습니다.</h3><br />
-		  공유방법 : 기프트콘 > 수정 > 공유폴더 선택<br /><br /><br />		  
-		  <span onClick={() => onClickFolderRemove(groupParamKey)}>[폴더삭제]</span>&nbsp;
+		  <h3> {paramType == 2 ? '사용한' : '등록된'} 기프트콘이 없습니다.</h3><br />
+		  공유방법 : 기프트콘 > 수정 > 공유폴더 선택<br /><br /><br />	
+	{tot_cnt == 0 ? 
+		  <span onClick={() => onClickFolderRemove(groupParamKey)}>[폴더삭제]</span>
+		  : null }
 	  </div>
 
 		  
@@ -372,12 +378,13 @@ const GroupListView = () => {
 			  </div>
 			</div>
 		  </div>
-	)}		  
+	)}		
+	{/*
 	{paramType !=2 ? 
 	  <div className="share_list" onClick={() => onLink(groupParamName, groupParamKey)}>
 	      <AiOutlineDelete size="30" /><br/>사용완료조회
 	  </div>
-		: null }
+		: null } */}
 		</div>
 		    <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 		<ToastsContainer className='toast' store={ToastsStore} lightBackground/>

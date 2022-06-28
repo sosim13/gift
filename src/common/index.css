@@ -587,3 +587,15 @@ ul.tabs li.current{
 .tab-content.current{
   display: inherit;
 }
+
+.shareInput {
+  font-size: 0.75rem;
+  height: 36px;
+  padding: 0 5px;
+  margin-bottom: 8px;
+  width: 180px;
+}
+
+.icon-middle {
+  vertical-align: -0.1em;
+}

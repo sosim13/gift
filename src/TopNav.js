@@ -40,7 +40,7 @@ function BottomNav() {
 
       <div className="top_wrapper">
 		 <div className="header">
-			<div className="gift-link"><img src="https://res.cloudinary.com/dv8img/image/upload/c_scale,w_920/v1650423539/web/gift_kvvce7.png" width="25" /> GIFT WALLET</div>
+			<div className="gift-link"><img src="https://res.cloudinary.com/dv8img/image/upload/v1656056708/gift/hmyznlv0fmsgoevrbfi8.png" width="25" /> GIFT WALLET</div>
 			<div className="top-link">		  
 			<Link to="/cardlist" className={linkNo === 4 ? "nav-link active" : "nav-link"}>
 				<AiOutlineCreditCard size="25" />

@@ -173,10 +173,10 @@ function Second() {
 				}
 			} 
 			if(resWordAll.split('.').length == 3){
-				setExpired(resWordAll.replace('까지','').replace('유효기간','').replace('사용기한','').replace('*','').replace(':','').replace('~','').replace('년','.').replace('월','.').replace('일','').replace(/\s/gi, ""));
+				setExpired(hipen(resWordAll).replace('까지','').replace('유효기간','').replace('사용기한','').replace('*','').replace(':','').replace('~','').replace('년','.').replace('월','.').replace('일','').replace(/\s/gi, ""));
 			}
 			if(resWordAll.indexOf('월') > 0 && resWordAll.indexOf('일') > 0){
-				setExpired(resWordAll.replace('까지','').replace('유효기간','').replace('사용기한','').replace('*','').replace(':','').replace('~','').replace('년','.').replace('월','.').replace('일','').replace(/\s/gi, ""));
+				setExpired(hipen(resWordAll).replace('까지','').replace('유효기간','').replace('사용기한','').replace('*','').replace(':','').replace('~','').replace('년','.').replace('월','.').replace('일','').replace(/\s/gi, ""));
 			}
 
 			getBrand(resWord);
@@ -223,8 +223,8 @@ function Second() {
     e.target.name === 'barcode' ? setBarcode(e.target.value) : setGongbak('');
     e.target.name === 'brand' ? setBrand(e.target.value) : setGongbak('');
     e.target.name === 'product' ? setProduct(e.target.value) : setGongbak('');
-    e.target.name === 'price' ? setPrice(e.target.value) : setGongbak('');
-    e.target.name === 'expired' ? setExpired(e.target.value) : setGongbak('');
+    e.target.name === 'price' ? setPrice(comma(e.target.value)) : setGongbak('');
+    e.target.name === 'expired' ? setExpired(hipen(e.target.value)) : setGongbak('');
   }
 
   const onSelectChange = (e) => {
@@ -252,7 +252,7 @@ function Second() {
   }, [rBrand]);
   function getProduct(search){
 	  var imsiBrand = "";
-	  const result = giftcon.map((item, index) => item.product.replace(/\s/gi, "") == search.replace(/\s/gi, "") ? (imsiBrand=item.brand, rProduct=item.product, rPrice=item.price) : null);
+	  const result = giftcon.map((item, index) => item.product.replace(/\s/gi, "") == search.replace(/\s/gi, "") ? (imsiBrand=item.brand, rProduct=item.product, rPrice=comma(item.price)) : null);
 	  if(rBrand == ""){
 		  rBrand = imsiBrand;
 	  }
@@ -270,6 +270,26 @@ function Second() {
   useEffect(() => {
 	  factory();
   }, []);
+
+  function comma(str) {
+	str = String(uncomma(str));
+	return str.replace(/(\d)(?=(?:\d{3})+(?!\d))/g, '$1,');
+  }
+
+  function uncomma(str) {
+	str = String(str);
+	return str.replace(/[^\d]+/g, '');
+  } 
+
+  function hipen(str) {
+	str = String(uncomma(str));
+	return str.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+  }
+
+  function unhipen(str) {
+	str = String(str);
+	return str.replace(/[\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\(\'\"]/g, "")
+  } 
 
   const onClickAdd = () => {
 
@@ -302,8 +322,8 @@ function Second() {
 	  barcode: barcode,
 	  brand: brand,
 	  product: product,
-	  price: price,
-	  expired: expired,
+	  price: uncomma(price),
+	  expired: unhipen(expired),
 	  wtime: wtime,
 	  groupKey: groupKey,
 	  groupName: groupName
@@ -355,7 +375,7 @@ function Second() {
 			<input type="text" name={'product'} className="gift_input" value={product} onChange={onChange} placeholder="상품명"/>
 		</div>
 		<div>
-			<input type="text" name={'price'} className="gift_input" value={price} onChange={onChange} placeholder="가격"/>
+			<input type="text" name={'price'} className="gift_input" value={price} onChange={onChange} placeholder="가격" />
 		</div>
 		<div>
 			<input type="text" name={'expired'} className="gift_input" value={expired} onChange={onChange} placeholder="유효기간"/>
@@ -373,6 +393,9 @@ function Second() {
 			) : (
 				null
 			)}
+		</div>
+		<div>
+			<br/>자동으로 못불러오는 경우<br/>수동으로 입력해주세요.
 		</div>
         <br/><br/><br/><br/><br/><br/><br/>
     <ToastsContainer className='toast' store={ToastsStore} lightBackground/>

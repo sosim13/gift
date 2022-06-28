@@ -4,6 +4,7 @@ import 'moment/locale/ko';	//대한민국
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {ToastsContainer, ToastsStore, ToastsContainerPosition} from 'react-toasts';
 import { getDatabase, ref, onValue, update, set, remove } from "firebase/database";
+import { AiOutlineWallet } from "react-icons/ai";
 
 var Barcode = require('react-barcode');
 var displayId = "";
@@ -25,6 +26,7 @@ function First() {
   const useTime = moment().format('YYYYMMDDHHmmss');
 
   const [datas, setDatas] = useState([]);
+  const [totalCnt, setTotalCnt] = useState(0);					// 총건수
   const [myCnt, setMyCnt] = useState(0);					// 내건수
   const [useCnt, setUseCnt] = useState(0);					// 사용건수
   const [groupCnt, setGroupCnt] = useState(0);				// 공유건수
@@ -65,7 +67,7 @@ function First() {
 					}
 					cnt2 = cnt2+1;
 				}else{							// 미사용
-					if(paramType != 2){
+					if(paramType != 2 && paramType != 3){
 						usersData.push({ ...users[id], id });
 					}
 					cnt1 = cnt1+1;
@@ -79,11 +81,33 @@ function First() {
 			}
 		}
 
+
 		const set = new Set(chk_data);
 		const uniqueArr = [...set];
 		// 공유된 기프트콘 있는지 확인
 		if(uniqueArr.indexOf(users[id].groupKey  ) >= 0){
-			usersData.push({ ...users[id], id });
+			if(paramType != 1 && paramType != 2 && paramType != 3){
+				if(users[id].useYn != 'Y'){		// 미사용
+					usersData.push({ ...users[id], id });
+				}else{
+					cnt2 = cnt2+1;
+				}
+			}else if(paramType == 1){
+				if(users[id].useYn == 'Y'){		// 사용
+					cnt2 = cnt2+1;
+				}
+			}else if(paramType == 2){
+				if(users[id].useYn == 'Y'){		// 사용
+					usersData.push({ ...users[id], id });
+					cnt2 = cnt2+1;
+				}
+			}else if(paramType == 3){
+				if(users[id].useYn != 'Y'){		// 사용
+					usersData.push({ ...users[id], id });
+				}else{
+					cnt2 = cnt2+1;
+				}
+			}
 			if(users[id].ss_account != ss_account){
 				if(users[id].useYn == 'Y'){
 					cnt4 = cnt4+1;
@@ -91,9 +115,13 @@ function First() {
 					cnt3 = cnt3+1;
 				}
 			}
+			
 		}		
       }
 
+	  
+      cnt= cnt1 + cnt3;
+	  setTotalCnt(cnt);
 	  setMyCnt(cnt1);
 	  setUseCnt(cnt2);
 	  setGroupCnt(cnt3);
@@ -118,8 +146,16 @@ function First() {
 
 
 //	  if(cnt == 0){
-	if(paramType != 2){
+	if(paramType != 1 && paramType != 2){
 	  if(cnt1+cnt3 == 0){
+		document.getElementById("tong2").style.display = "block";
+		document.getElementById("tong").style.display = "none";
+	  }else{
+		document.getElementById("tong2").style.display = "none";
+		document.getElementById("tong").style.display = "none";
+	  } 
+	}else if(paramType == 1){
+	  if(cnt1 == 0){
 		document.getElementById("tong2").style.display = "block";
 		document.getElementById("tong").style.display = "none";
 	  }else{
@@ -165,7 +201,7 @@ function First() {
 
 
   const onUpdate = (id, statusVal) => {
-    const [user] = datas.filter(el => el.id === id);
+//    const [user] = datas.filter(el => el.id === id);
 
 
     if(statusVal == 'Y'){
@@ -197,7 +233,7 @@ function First() {
 		});
 	}
 
-    setDatas(datas.map(el => el.id === id ? {...el, useYn: statusVal} : el));
+//    setDatas(datas.map(el => el.id === id ? {...el, useYn: statusVal} : el));
   };
 
   const onClickRemove = (id) => {
@@ -231,10 +267,11 @@ function First() {
 	<div className="App" id="App">
 	  <div>
 	    <ul className="tabs">
-		  <li className={paramType != 2 ? "tab-link current" : "tab-link"} data-tab="tab-1"><span onClick={() => onLink('/')}>내지갑 : {myCnt}</span></li>
-		  <li className={paramType == 2 ? "tab-link current" : "tab-link"} data-tab="tab-2"><span onClick={() => onLink('/first/2')}>사용 : {useCnt}</span></li>
-		  <li className="tab-link" data-tab="tab-3"><span onClick={() => onLink('/grouplist')}>공유지갑 : {groupCnt}</span></li>
-		  <li className="tab-link" data-tab="tab-4"><span onClick={() => onLink('/grouplist')}>공유사용 : {groupUseCnt}</span></li>
+		  <li className={paramType != 1 && paramType != 2 && paramType != 3 ? "tab-link current" : "tab-link"} data-tab="tab-1"><span onClick={() => onLink('/')}><AiOutlineWallet className='icon-middle' /> : {totalCnt}</span></li>
+		  <li className={paramType == 1 ? "tab-link current" : "tab-link"} data-tab="tab-1"><span onClick={() => onLink('/first/1')} className='icon-middle'>내지갑 : {myCnt}</span></li>
+		  <li className={paramType == 2 ? "tab-link current" : "tab-link"} data-tab="tab-2"><span onClick={() => onLink('/first/2')} className='icon-middle'>사용 : {useCnt}</span></li>
+		  <li className={paramType == 3 ? "tab-link current" : "tab-link"} data-tab="tab-3"><span onClick={() => onLink('/first/3')} className='icon-middle'>공유 : {groupCnt}</span></li>
+		{/*<li className="tab-link" data-tab="tab-4"><span onClick={() => onLink('/grouplist')}>사용 : {groupUseCnt}</span></li>*/}
 		</ul>
 	  </div>
 	  	    
@@ -243,7 +280,7 @@ function First() {
 	  </div>
 	  <div id="tong2" className="tong">
 		{ss_account != null ? (
-			  <><h3>등록된 기프트콘이 없습니다.</h3><br />
+			  <><h3>{paramType == 2 ? '사용한' : '등록된'} 기프트콘이 없습니다.</h3><br />
 			  기프트콘 등록 후 이용해주세요.</>
 			) : (
 			  <><h3>로그인이 필요합니다.</h3><br />

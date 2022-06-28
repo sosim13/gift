@@ -100,7 +100,7 @@ function CardList() {
 	  )}
 	  {datas.length == 0 ? (
 		  <div className="tong">
-		  <h3>등록된 카드가 없습니다.</h3>
+		  <h3>등록된 카드가 없습니다.<br/><br/>멤버십카드를 등록해주세요.</h3>
 			</div>
 		  ): null}
 	  <div id="modal" className={close ? 'modal' : 'openModal modal'}>

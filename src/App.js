@@ -9,6 +9,7 @@ import CardAdd from "./CardAdd";
 import Calendar from "./Calendar";
 import GiftEdit from "./GiftEdit";
 import Login from './login/Login';
+import Privacy from './Privacy';
 
 function App() {	
 
@@ -27,6 +28,7 @@ function App() {
         <Route path={`/GroupListView/:name/:key/:type`} element={<GroupListView />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path={`/GiftEdit/:id`} element={<GiftEdit />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route path="/login" element={<Login />} />
       </Routes>
     </div>
